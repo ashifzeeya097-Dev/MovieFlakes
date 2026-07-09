@@ -5,6 +5,7 @@ const API_KEY = "3ea9b9899a266f601028fbdd3d760786";
 const BASE_URL = "https://api.themoviedb.org/3";
 
 let trendingMovies = [];
+let searchResults = [];
 const likedRow = document.querySelector(".liked-row");
 const trendingRow = document.querySelector(".trending-carausel");
 const nextBtn = document.querySelector(".next-btn");
@@ -132,7 +133,7 @@ searchInput.addEventListener("input", () => {
 
         exitSearchMode();
 
-        fetchMovies("/movie/popular", ".trending-carausel");
+        displayMovies(trendingMovies, trendingRow);
 
         return;
     }
@@ -183,16 +184,37 @@ async function fetchMovies(endpoint, rowSelector = ".trending-carausel") {
     const data = await response.json();
     const movies = Array.isArray(data.results) ? data.results : [];
 
-    if (rowSelector === ".trending-carausel") {
-      trendingMovies = movies;
+    if (endpoint.startsWith("/search/movie") && !isSearching) {
+    return;
     }
+
+  if (rowSelector === ".trending-carausel") {
+    if (isSearching) {
+        searchResults = movies;
+    } else {
+        trendingMovies = movies;
+    }
+  }
 
     if (!movies.length) {
       console.warn("No movie results returned for:", url);
     }
 
-    displayMovies(movies, movieRow);
-    renderLikedMovies();
+    if (rowSelector === ".trending-carausel") {
+    if (isSearching) {
+        displayMovies(searchResults, movieRow);
+        searchResults = movies;
+        console.log("Search stored:", searchResults.length);
+    } else {
+        displayMovies(trendingMovies, movieRow);
+        trendingMovies = movies;
+        console.log("Trending stored:", trendingMovies.length);
+    }
+  } else {
+      displayMovies(movies, movieRow);
+  }
+
+renderLikedMovies();
   } catch (error) {
     console.error("Error fetching movies:", error, url);
   }
@@ -220,7 +242,7 @@ function createMovieCard(movie) {
   const state = getMovieState(movie.id);
   const posterPath = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : "assets/spider-man-5.webp";
+    : " ";
   const releaseYear = movie.release_date ? movie.release_date.slice(0, 4) : "N/A";
   const genre = movie.genre_ids?.length
     ? genreMap[movie.genre_ids[0]]
@@ -260,10 +282,15 @@ function renderLikedMovies() {
 }
 
 function renderAllRows() {
-  if (trendingMovies.length && trendingRow) {
-    displayMovies(trendingMovies, trendingRow);
-  }
-  renderLikedMovies();
+    if (!trendingRow) return;
+
+    if (isSearching) {
+        displayMovies(searchResults, trendingRow);
+    } else {
+        displayMovies(trendingMovies, trendingRow);
+    }
+
+    renderLikedMovies();
 }
 
 
@@ -384,27 +411,38 @@ function enterSearchMode(query) {
 
     isSearching = true;
 
-    trendingBtn.classList.add("active");
-    likedBtn.classList.remove("active");
-
+    // Always switch to the Trending view
     showTrending();
 
+    // Make Trending tab active
+    tabs.forEach(tab => tab.classList.remove("active"));
+
+    if (trendingBtn) {
+        trendingBtn.classList.add("active");
+    }
+
+    movieTabs.classList.remove("liked");
+
+    // Hide the tab selector during search
     movieTabs.classList.add("hidden");
 
+    // Show search heading
     sectionTitle.textContent = `🔍 Search Results for "${query}"`;
+    sectionTitle.style.display = "block";
     sectionTitle.classList.remove("hidden");
 }
 
 function exitSearchMode() {
     isSearching = false;
-    
-    sectionTitle.style.display = "none";
 
     showTrending();
 
+    tabs.forEach(tab => tab.classList.remove("active"));
     trendingBtn.classList.add("active");
-    likedBtn.classList.remove("active");
 
+    movieTabs.classList.remove("liked");
     movieTabs.classList.remove("hidden");
+
     sectionTitle.classList.add("hidden");
+    sectionTitle.style.display = "none";
 }
