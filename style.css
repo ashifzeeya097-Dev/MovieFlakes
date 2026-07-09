@@ -152,6 +152,7 @@ body::-webkit-scrollbar {
 
 .search-container {
     display: flex;
+    position: sticky;
     width: 100%;
     align-items: center;
     justify-content: center;
