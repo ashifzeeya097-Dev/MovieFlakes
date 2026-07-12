@@ -4,19 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MovieFlakes</title>
+
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="infinite.css">
+
     <script src="script.js" defer></script>
+    <script src="js/infinite.js" defer></script>
 </head>
 <body>
-    <div class="header">
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="header">
+
         <div class="title">
             <a href="#home">Movie<span>Flakes</span></a>
         </div>
+
         <button class="menu-btn">
             <span></span>
             <span></span>
             <span></span>
         </button>
+
+        <!-- Desktop Navigation -->
+
         <nav class="navbar-desktop">
             <ul>
                 <li id="movies"><a href="#movies">Movies</a></li>
@@ -24,69 +36,151 @@
                 <li id="popular"><a href="#popular">Popular</a></li>
                 <li id="top-rated"><a href="#toprated">Top Rated</a></li>
                 <li id="now-playing"><a href="#nowplaying">Now Playing</a></li>
+
                 <li>
                     <div class="dropdown">
-                        <button class="dropdown-btn">Genres<span class="drop-icon">🔰</span></button>
+
+                        <button class="dropdown-btn">
+                            Genres
+                            <span class="drop-icon">🔰</span>
+                        </button>
+
                         <ul class="dropdown-menu">
                             <li id="action"><a href="#action">Action</a></li>
                             <li id="drama"><a href="#drama">Drama</a></li>
                             <li id="romance"><a href="#romance">Romance</a></li>
                             <li id="thriller"><a href="#thriller">Thriller</a></li>
-                            
                         </ul>
+
                     </div>
                 </li>
+
             </ul>
-        </nav> 
-         
+        </nav>
+
+        <!-- Mobile Navigation -->
+
         <nav class="navbar-mobile">
             <ul>
+
                 <li id="movies"><a href="#movies">Movies</a></li>
                 <li id="series"><a href="#series">Series</a></li>
                 <li id="popular"><a href="#popular">Popular</a></li>
                 <li id="top-rated"><a href="#toprated">Top Rated</a></li>
                 <li id="now-playing"><a href="#nowplaying">Now Playing</a></li>
+
                 <li class="sub-menu">
                     <ul>
                         <li id="action"><a href="#action">Action</a></li>
                         <li id="drama"><a href="#drama">Drama</a></li>
                         <li id="romance"><a href="#romance">Romance</a></li>
-                        <li id="thriller"><a href="#thriller">Thriller</a></li> 
+                        <li id="thriller"><a href="#thriller">Thriller</a></li>
                     </ul>
                 </li>
+
             </ul>
-        </nav>  
-    </div>
+        </nav>
+
+    </header>
+
+    <!-- ================= SEARCH ================= -->
+
     <div class="search-container">
-        <input type="text" placeholder="Search for movies..." class="search-input" id="inputText">
+        <input
+            type="text"
+            class="search-input"
+            id="inputText"
+            placeholder="Search for movies..."
+        >
     </div>
 
-    <h3 id="section-title" class="search-title hidden"></h3>
+    <!-- ========================================================= -->
+    <!-- HOME CONTENT -->
+    <!-- Everything inside this container is hidden during search. -->
+    <!-- ========================================================= -->
 
-    
-    <div class="movie-tabs">
-        <button class="tab-btn active" data-tab="trending">
-            🔥 Trending
-        </button>
+    <main class="home-content">
 
-        <button class="tab-btn" data-tab="liked">
-        ❤️ Liked
-        </button>
+        <!-- Movie Tabs -->
 
-        <div class="tab-indicator"></div>
-    </div>
-    <div class="trending-wrapper">
-        <button class="scroll-btn prev-btn">&#10094;</button>
-        <div class="trending-carausel">
-            
+        <div class="movie-tabs">
+
+            <button class="tab-btn active" data-tab="trending">
+                🔥 Trending
+            </button>
+
+            <button class="tab-btn" data-tab="liked">
+                ❤️ Liked
+            </button>
+
+            <div class="tab-indicator"></div>
+
         </div>
-        <button class="scroll-btn next-btn">&#10095;</button>
-    </div>
 
-    <div class="liked-wrapper">
-        <button class="scroll-btn liked-prev-btn">&#10094;</button>
-        <div class="liked-row"></div>
-        <button class="scroll-btn liked-next-btn">&#10095;</button>
-    </div>
+        <!-- Trending -->
+
+        <section class="trending-wrapper">
+
+            <button class="scroll-btn prev-btn">
+                &#10094;
+            </button>
+
+            <div class="trending-carausel"></div>
+
+            <button class="scroll-btn next-btn">
+                &#10095;
+            </button>
+
+        </section>
+
+        <!-- Liked -->
+
+        <section class="liked-wrapper">
+
+            <button class="scroll-btn liked-prev-btn">
+                &#10094;
+            </button>
+
+            <div class="liked-row"></div>
+
+            <button class="scroll-btn liked-next-btn">
+                &#10095;
+            </button>
+
+        </section>
+
+        <!-- Infinite Browse Section -->
+
+        <section class="movie-library">
+
+            <h2 class="library-title">
+                🎬 Browse Movies
+            </h2>
+
+            <div class="browse-grid"></div>
+
+            <div id="scroll-sentinel">
+
+                <div class="loader"></div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- SEARCH CONTENT -->
+    <!-- Hidden until the user starts searching -->
+    <!-- ========================================================= -->
+
+    <section class="search-wrapper hidden">
+
+        <h2 id="section-title" class="search-title"></h2>
+
+        <div class="search-grid"></div>
+
+    </section>
+
 </body>
 </html>

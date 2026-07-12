@@ -1,0 +1,11 @@
+.browse-grid,
+.search-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:24px;
+}
+
+.browse-grid .movie-card,
+.search-grid .movie-card{
+    width:100%;
+}

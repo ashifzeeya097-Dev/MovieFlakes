@@ -4,8 +4,6 @@ const STORAGE_KEY = "movieAppState";
 const API_KEY = "3ea9b9899a266f601028fbdd3d760786";
 const BASE_URL = "https://api.themoviedb.org/3";
 
-let trendingMovies = [];
-let searchResults = [];
 const likedRow = document.querySelector(".liked-row");
 const trendingRow = document.querySelector(".trending-carausel");
 const nextBtn = document.querySelector(".next-btn");
@@ -25,7 +23,16 @@ const dropBtn = document.querySelector(".dropdown-btn");
 const menu = document.querySelector(".dropdown-menu");
 const logoBtn = document.querySelector(".title");
 
+const homeContent = document.querySelector(".home-content");
+const searchWrapper = document.querySelector(".search-wrapper");
+
+const browseGrid = document.querySelector(".browse-grid");
+const searchGrid = document.querySelector(".search-grid");
+
 let currentView = "trending";
+let trendingMovies = [];
+let browseMovies = [];
+let currentBrowsePage = 1;
 
 let isSearching = false;
 let searchTimeout;
@@ -119,7 +126,7 @@ async function searchMovies(query){
     const endpoint =
         `/search/movie?query=${encodeURIComponent(query)}`;
 
-    await fetchMovies(endpoint, ".trending-carausel");
+    await fetchMovies(endpoint, ".search-grid");
 
 }
 
@@ -134,9 +141,8 @@ searchInput.addEventListener("input", () => {
 
         exitSearchMode();
 
-        displayMovies(trendingMovies, trendingRow);
-
         return;
+
     }
 
     // Wait until user types at least 3 characters
@@ -185,42 +191,24 @@ async function fetchMovies(endpoint, rowSelector = ".trending-carausel") {
     const data = await response.json();
     const movies = Array.isArray(data.results) ? data.results : [];
 
-    if (endpoint.startsWith("/search/movie") && !isSearching) {
-    return;
-    }
-
-  if (rowSelector === ".trending-carausel") {
-    if (isSearching) {
-        searchResults = movies;
-    } else {
-        trendingMovies = movies;
-    }
-  }
-
-    if (!movies.length) {
-      console.warn("No movie results returned for:", url);
-    }
-
     if (rowSelector === ".trending-carausel") {
-    if (isSearching) {
-        displayMovies(searchResults, movieRow);
-        searchResults = movies;
-        console.log("Search stored:", searchResults.length);
-    } else {
-        displayMovies(trendingMovies, movieRow);
-        trendingMovies = movies;
-        console.log("Trending stored:", trendingMovies.length);
+    trendingMovies = movies;
     }
-  } else {
-      displayMovies(movies, movieRow);
-  }
 
-renderLikedMovies();
+    if (rowSelector === ".browse-grid") {
+        browseMovies = movies;
+    }
+
+    if (rowSelector === ".search-grid") {
+        searchMoviesList = movies;
+    }
+  
+
+    displayMovies(movies, movieRow);
   } catch (error) {
     console.error("Error fetching movies:", error, url);
   }
 }
-
 function displayMovies(movies, movieRow) {
   if (!movieRow) return;
 
@@ -282,30 +270,6 @@ function renderLikedMovies() {
   displayMovies(Object.values(appState.liked), likedRow);
 }
 
-function renderAllRows() {
-    if (!trendingRow) return;
-
-    if (isSearching) {
-        displayMovies(searchResults, trendingRow);
-    } else {
-        displayMovies(trendingMovies, trendingRow);
-    }
-
-    renderLikedMovies();
-}
-
-
-async function init() {
-
-    exitSearchMode();
-
-    await fetchGenres();
-
-    await fetchMovies("/movie/popular",".trending-carausel");
-
-}
-
-init();
 
 function setupScrollButtons(buttonPrev, buttonNext, row) {
   if (!row) return;
@@ -336,9 +300,6 @@ if (trendingRow && nextBtn && prevBtn) {
 setupScrollButtons(likedPrevBtn, likedNextBtn, likedRow);
 
 renderLikedMovies();
-
-
-
 
 dropBtn.addEventListener("click", () => {
   menu.classList.toggle("show");
@@ -408,63 +369,78 @@ function showLiked() {
     trendingWrapper.classList.remove("active");
 }
 
-function enterSearchMode(query) {
+function enterSearchMode(query){
 
     isSearching = true;
 
-    // Always switch to the Trending view
-    showTrending();
+    homeContent.classList.add("hidden");
+    searchWrapper.classList.remove("hidden");
 
-    // Make Trending tab active
-    tabs.forEach(tab => tab.classList.remove("active"));
+    window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+    });
 
-    if (trendingBtn) {
-        trendingBtn.classList.add("active");
-    }
-
-    movieTabs.classList.remove("liked");
-
-    // Hide the tab selector during search
-    movieTabs.classList.add("hidden");
-
-    // Show search heading
     sectionTitle.textContent = `🔍 Search Results for "${query}"`;
-    sectionTitle.style.display = "block";
-    sectionTitle.classList.remove("hidden");
+
 }
 
-function exitSearchMode() {
+function exitSearchMode(){
+
     isSearching = false;
 
-    showTrending();
+    searchWrapper.classList.add("hidden");
+    homeContent.classList.remove("hidden");
 
-    tabs.forEach(tab => tab.classList.remove("active"));
-    trendingBtn.classList.add("active");
-
-    movieTabs.classList.remove("liked");
-    movieTabs.classList.remove("hidden");
-
-    sectionTitle.classList.add("hidden");
-    sectionTitle.style.display = "none";
+    searchInput.value = "";
+    searchGrid.innerHTML = "";
 }
-    
- logoBtn.addEventListener("click", (e) => {
-    e.preventDefault();
 
-    // Clear search
+function resetHome(){
+
     searchInput.value = "";
 
-    // Exit search mode
     exitSearchMode();
 
-    // Restore popular movies
     displayMovies(trendingMovies, trendingRow);
 
-    // Scroll to top (optional)
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
- });
+    displayMovies(browseMovies, browseGrid);
 
+}
+
+logoBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    resetHome();
+});
+
+function renderAllRows(){
+
+    displayMovies(trendingMovies, trendingRow);
+
+    displayMovies(browseMovies, browseGrid);
+
+    renderLikedMovies();
+
+}
+
+
+async function init() {
+
+    await fetchGenres();
+
+    // Trending carousel
+    await fetchMovies("/movie/popular", ".trending-carausel");
+
+    // Browse grid
+    await fetchMovies(
+    `/movie/now_playing?page=${currentBrowsePage}`,
+    ".browse-grid"
+);
+
+    renderLikedMovies();
+
+    exitSearchMode();
+}
+
+init();
   
